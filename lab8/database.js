@@ -15,7 +15,7 @@ pmysql.createPool({
     })
 
 module.exports = {
-    getDepartment: function () {
+    getStudents: function () {
         return new Promise((resolve, reject) => {
             pool.query('SELECT * FROM student_table')
                 .then((data) => {
@@ -25,6 +25,18 @@ module.exports = {
                     reject(error)
                 })
         })
+    },
+    deleteStudent: function (sid) {
+        return new Promise((resolve, reject) => {
+            pool.query(`DELETE FROM student_table WHERE student_id = ${sid}`)
+                .then((data) => {
+                    resolve(data)
+                })
+                .catch(error => {
+                    reject(error)
+                })
+        })
+
     }
 }
 

@@ -11,6 +11,7 @@ const app = express();
 
 //used for indentation in json output
 app.set('json spaces', 2)
+app.set('view engine', "ejs");
 
 // Add the body parser to the app
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -24,14 +25,44 @@ app.use(function (req, res, next) {
 });
 
 app.get("/", (req, res) => {
-    database.getDepartment()
+    database.getStudents()
     .then((data) => {
-        console.log(data)
-        let html = ejs.render(`<ul><li><%= data %></li><ul/>`, {data: data});
-        res.send(html)
+        res.render("showStudents", {"students": data})
+
     })
     .catch((error) => {
         console.log("pool error " + error)
+    })
+})
+
+app.get("/students/:sid", (req, res) => {
+    let studentFound = false;
+    database.getStudents()
+    .then((data) => {
+        data.forEach(student => {
+            if(student.student_id == req.params.sid){
+                console.log(student)
+                res.render("showStudent", {"student": student})
+                studentFound = true;
+            }
+        });
+    })
+    .catch((error) => {
+        console.log("pool error " + error)
+    })
+    if(studentFound == false){
+        res.send(`<h1>No such student with SID ${req.params.sid}<h1/>`)
+    }
+})
+
+app.get("/students/delete/:sid", (req, res) => {
+    console.log(req.params.sid)
+    database.deleteStudent(req.params.sid)
+    .then((date) => {
+    res.redirect("/")
+    })
+    .catch((error) => {
+        res.send(`<h1>Could not remove student ${req.params.sid} since there is a foreign key constraint</h1>`)
     })
 })
 
